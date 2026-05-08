@@ -1,6 +1,5 @@
 import connectDB from "@/lib/db";
 import bcrypt from "bcryptjs";
-
 import { User } from "@/lib/models/User";
 import { NextResponse } from "next/server";
 import { verifyToken } from "@/lib/authHelper";
@@ -11,7 +10,6 @@ export async function GET(req, { params }) {
     await connectDB();
 
     const auth = verifyToken(req);
-
     if (!auth.success) {
       return NextResponse.json({
         success: false,
@@ -19,9 +17,7 @@ export async function GET(req, { params }) {
       });
     }
 
-    const { id } = await params;
-
-    const user = await User.findById(id).select("-password");
+    const user = await User.findById(params.id).select("-password");
 
     return NextResponse.json({
       success: true,
@@ -37,12 +33,11 @@ export async function GET(req, { params }) {
 }
 
 // 🔵 UPDATE USER
-export async function PUT(req, context) {
+export async function PUT(req, { params }) {
   try {
     await connectDB();
 
     const auth = verifyToken(req);
-
     if (!auth.success) {
       return NextResponse.json({
         success: false,
@@ -50,17 +45,13 @@ export async function PUT(req, context) {
       });
     }
 
-    const { id } = await context.params;
-
     const body = await req.json();
 
-    // 🟢 Update Data
-    let updateData = {
+    const updateData = {
       name: body.name,
       age: body.age,
-      email: body.email.toLowerCase().trim(),
+      email: body.email ? body.email.toLowerCase().trim() : "",
 
-      // 👇 NEW FIELDS
       address: body.address,
       contact: body.contact,
       education: body.education,
@@ -69,15 +60,12 @@ export async function PUT(req, context) {
       profilePic: body.profilePic,
     };
 
-    // 🔥 Password Update Optional
     if (body.password && body.password.trim() !== "") {
-      const hashed = await bcrypt.hash(body.password, 10);
-
-      updateData.password = hashed;
+      updateData.password = await bcrypt.hash(body.password, 10);
     }
 
     const updatedUser = await User.findByIdAndUpdate(
-      id,
+      params.id,
       updateData,
       { new: true }
     ).select("-password");
@@ -97,12 +85,11 @@ export async function PUT(req, context) {
 }
 
 // 🔴 DELETE USER
-export async function DELETE(req, context) {
+export async function DELETE(req, { params }) {
   try {
     await connectDB();
 
     const auth = verifyToken(req);
-
     if (!auth.success) {
       return NextResponse.json({
         success: false,
@@ -110,9 +97,7 @@ export async function DELETE(req, context) {
       });
     }
 
-    const { id } = await context.params;
-
-    const deletedUser = await User.findByIdAndDelete(id);
+    const deletedUser = await User.findByIdAndDelete(params.id);
 
     if (!deletedUser) {
       return NextResponse.json({

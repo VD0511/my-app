@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import { User } from "@/lib/models/User";
-import bcrypt from "bcryptjs"; 
+import bcrypt from "bcryptjs";
 
+// 🟢 GET USER BY EMAIL
 export async function GET(req) {
   try {
     await connectDB();
@@ -11,90 +12,89 @@ export async function GET(req) {
     let email = searchParams.get("email");
 
     if (!email) {
-      return Response.json({
+      return NextResponse.json({
         success: false,
         message: "Email missing",
       });
     }
 
-    email = email.trim().toLowerCase();
+    email = email.toLowerCase().trim();
 
-    const user = await User.findOne({ email: email.toLowerCase() });
+    const user = await User.findOne({ email }).select("-password");
 
     if (!user) {
-      return Response.json({
+      return NextResponse.json({
         success: false,
         message: "User not found",
       });
     }
 
-    return Response.json({
+    return NextResponse.json({
       success: true,
       user,
     });
 
   } catch (error) {
-    return Response.json({
+    return NextResponse.json({
       success: false,
       message: error.message,
     });
   }
 }
 
-export async function POST(request) {
+// 🟢 CREATE USER (SIGNUP)
+export async function POST(req) {
   try {
-    await connectDB(); // 📌 DB CONNECT
+    await connectDB();
 
-    const payload = await request.json();
+    const payload = await req.json();
 
-    // ❗ validation
     if (
       !payload.name ||
       !payload.age ||
       !payload.email ||
       !payload.password
     ) {
-      return NextResponse.json(
-        { message: "All fields are required", success: false },
-        { status: 400 }
-      );
+      return NextResponse.json({
+        success: false,
+        message: "All fields are required",
+      }, { status: 400 });
     }
 
-    // ❗ duplicate email check
-    const existingUser = await User.findOne({ email: payload.email });
+    const email = payload.email.toLowerCase().trim();
+
+    const existingUser = await User.findOne({ email });
 
     if (existingUser) {
-      return NextResponse.json(
-        { message: "Email already exists", success: false },
-        { status: 409 }
-      );
+      return NextResponse.json({
+        success: false,
+        message: "Email already exists",
+      }, { status: 409 });
     }
 
-    // 🔐 PASSWORD HASH (IMPORTANT)
     const hashedPassword = await bcrypt.hash(payload.password, 10);
 
-    // 👤 CREATE USER
     const newUser = new User({
       name: payload.name,
       age: payload.age,
-      email: payload.email.toLowerCase().trim(),
+      email,
       password: hashedPassword,
     });
 
     const result = await newUser.save();
 
     return NextResponse.json({
-      message: "User created successfully",
       success: true,
+      message: "User created successfully",
       result,
     });
 
   } catch (error) {
-    console.log("Error:", error);
+    console.log(error);
 
     return NextResponse.json({
-      message: "Internal server error",
       success: false,
+      message: "Internal server error",
     });
   }
 }
