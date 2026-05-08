@@ -3,35 +3,52 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
+type UserType = {
+  _id: string;
+  name: string;
+  age: number;
+  email: string;
+  profilePic?: string;
+};
+
 export default function AdminDashboard() {
-  const [users, setUsers] = useState([]);
+
+  const [users, setUsers] = useState<UserType[]>([]);
   const router = useRouter();
 
   useEffect(() => {
     fetch("/api/admin/users")
       .then((res) => res.json())
       .then((data) => {
-        if (data.success) setUsers(data.users);
+        if (data.success) {
+          setUsers(data.users);
+        }
       });
   }, []);
 
- const handleDelete = async (id: string) => {
-  if (!confirm("Delete this user?")) return;
+  const handleDelete = async (id: string) => {
 
-  const res = await fetch("/api/admin/users/delete", {
-    method: "DELETE",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ id }),
-  });
+    if (!confirm("Delete this user?")) return;
 
-  const data = await res.json();
+    const res = await fetch("/api/admin/users/delete", {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ id }),
+    });
 
-  if (data.success) {
-    alert("User deleted");
-  }
-};
+    const data = await res.json();
+
+    if (data.success) {
+
+      alert("User deleted");
+
+      setUsers((prevUsers) =>
+        prevUsers.filter((user) => user._id !== id)
+      );
+    }
+  };
 
   const handleLogout = async () => {
     await fetch("/api/logout");
@@ -68,6 +85,7 @@ export default function AdminDashboard() {
           >
             🚪 Logout
           </button>
+
         </div>
       </aside>
 
@@ -90,7 +108,10 @@ export default function AdminDashboard() {
           <div className="flex items-center justify-between md:justify-end gap-4">
 
             <div className="bg-zinc-950 border border-zinc-800 px-4 py-2 md:px-5 md:py-3 rounded-2xl">
-              <p className="text-xs md:text-sm text-zinc-400">Users</p>
+              <p className="text-xs md:text-sm text-zinc-400">
+                Users
+              </p>
+
               <h2 className="text-xl md:text-2xl font-bold text-cyan-400">
                 {users.length}
               </h2>
@@ -98,8 +119,10 @@ export default function AdminDashboard() {
 
             <img
               src="https://i.pravatar.cc/100"
+              alt="Admin"
               className="w-10 h-10 md:w-14 md:h-14 rounded-full border-2 md:border-4 border-cyan-500"
             />
+
           </div>
         </div>
 
@@ -107,21 +130,30 @@ export default function AdminDashboard() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-8">
 
           <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-5 md:p-6">
-            <p className="text-zinc-400 text-sm">Total Users</p>
+            <p className="text-zinc-400 text-sm">
+              Total Users
+            </p>
+
             <h2 className="text-3xl md:text-4xl font-bold text-cyan-400 mt-2">
               {users.length}
             </h2>
           </div>
 
           <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-5 md:p-6">
-            <p className="text-zinc-400 text-sm">Status</p>
+            <p className="text-zinc-400 text-sm">
+              Status
+            </p>
+
             <h2 className="text-3xl md:text-4xl font-bold text-green-400 mt-2">
               Active
             </h2>
           </div>
 
           <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-5 md:p-6">
-            <p className="text-zinc-400 text-sm">Access</p>
+            <p className="text-zinc-400 text-sm">
+              Access
+            </p>
+
             <h2 className="text-3xl md:text-4xl font-bold text-yellow-400 mt-2">
               Granted
             </h2>
@@ -139,10 +171,13 @@ export default function AdminDashboard() {
           </div>
 
           {users.length === 0 ? (
+
             <div className="p-6 md:p-10 text-center text-zinc-400">
               No users found
             </div>
+
           ) : (
+
             <table className="w-full min-w-[600px]">
 
               <thead className="bg-zinc-900">
@@ -156,19 +191,38 @@ export default function AdminDashboard() {
               </thead>
 
               <tbody>
+
                 {users.map((user) => (
-                  <tr key={user._id} className="border-b border-zinc-800">
+
+                  <tr
+                    key={user._id}
+                    className="border-b border-zinc-800"
+                  >
 
                     <td className="p-4 flex items-center gap-3">
+
                       <img
-                        src={user.profilePic || "https://i.pravatar.cc/100"}
+                        src={
+                          user.profilePic ||
+                          "https://i.pravatar.cc/100"
+                        }
+                        alt={user.name}
                         className="w-10 h-10 rounded-full"
                       />
-                      <span className="text-sm">{user.name}</span>
+
+                      <span className="text-sm">
+                        {user.name}
+                      </span>
+
                     </td>
 
-                    <td className="p-4">{user.age}</td>
-                    <td className="p-4 text-sm text-zinc-300">{user.email}</td>
+                    <td className="p-4">
+                      {user.age}
+                    </td>
+
+                    <td className="p-4 text-sm text-zinc-300">
+                      {user.email}
+                    </td>
 
                     <td className="p-4">
                       <span className="text-green-400 text-sm">
@@ -177,16 +231,19 @@ export default function AdminDashboard() {
                     </td>
 
                     <td className="p-4">
+
                       <button
                         onClick={() => handleDelete(user._id)}
                         className="text-red-400 text-sm border border-red-500/30 px-3 py-1 rounded-lg"
                       >
                         Delete
                       </button>
+
                     </td>
 
                   </tr>
                 ))}
+
               </tbody>
 
             </table>
