@@ -15,20 +15,23 @@ export default function AdminDashboard() {
       });
   }, []);
 
-  const handleDelete = async (id) => {
-    if (!confirm("Delete this user?")) return;
+ const handleDelete = async (id: string) => {
+  if (!confirm("Delete this user?")) return;
 
-    const res = await fetch("/api/admin/users/delete", {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ idToDelete: id }),
-    });
+  const res = await fetch("/api/admin/users/delete", {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ id }),
+  });
 
-    if (res.ok) {
-      setUsers(users.filter((u) => u._id !== id));
-      alert("User deleted!");
-    }
-  };
+  const data = await res.json();
+
+  if (data.success) {
+    alert("User deleted");
+  }
+};
 
   const handleLogout = async () => {
     await fetch("/api/logout");
