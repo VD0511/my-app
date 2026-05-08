@@ -54,51 +54,60 @@ export default function ProAuthUI() {
   };
 
   // 🟢 SIGNUP
-  const handleSignup = async () => {
-    if (!name || !age || !email || !password) {
-      alert("Please fill all fields");
-      return;
+ // 🟢 SIGNUP
+const handleSignup = async () => {
+
+  if (!name || !age || !email || !password) {
+    alert("Please fill all fields");
+    return;
+  }
+
+  try {
+
+    setLoading(true);
+
+    const response = await fetch("/api/users", {
+      method: "POST",
+
+      body: JSON.stringify({
+        name,
+        age,
+        email,
+        password,
+      }),
+
+      headers: {
+        "content-type": "application/json",
+      },
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+
+      alert("Account created successfully!");
+
+      setIsLogin(true);
+
+      setName("");
+      setAge("");
+      setEmail("");
+      setPassword("");
+
+    } else {
+
+      alert(result.message);
     }
 
-    try {
-      setLoading(true);
+  } catch (err) {
 
-      let response = await fetch("/api/users", {
-        method: "POST",
+    console.log(err);
 
-        body: JSON.stringify({
-          name,
-          age,
-          email,
-          password,
-        }),
+  } finally {
 
-        headers: {
-          "content-type": "application/json",
-        },
-      });
-
-      response = await response.json();
-
-      if (response.success) {
-        alert("Account created successfully!");
-
-        setIsLogin(true);
-
-        setName("");
-        setAge("");
-        setEmail("");
-        setPassword("");
-      } else {
-        alert(response.message);
-      }
-    } catch (err) {
-      console.log(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+    setLoading(false);
+  }
+};
   return (
     <div className="min-h-screen relative overflow-hidden bg-black flex items-center justify-center px-4">
       
