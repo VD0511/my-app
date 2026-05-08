@@ -3,8 +3,23 @@
 import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+type UserType = {
+  name?: string;
+  age?: number;
+  email?: string;
+  password?: string;
+  address?: string;
+  contact?: string;
+ education?: string;
+  hobby?: string;
+  interest?: string;
+  profilePic?: string;
+};
+
 export default function UpdateUser() {
+
   const params = useSearchParams();
+
   const id = params.get("id");
 
   const router = useRouter();
@@ -22,86 +37,114 @@ export default function UpdateUser() {
   const [hobby, setHobby] = useState("");
   const [interest, setInterest] = useState("");
   const [profilePic, setProfilePic] = useState("");
+
   const [loading, setLoading] = useState(true);
 
   // 🟢 Fetch User
   useEffect(() => {
+
     const getUser = async () => {
+
       try {
-        let res = await fetch(`/api/users/${id}`);
-        let data = await res.json();
+
+        const res = await fetch(`/api/users/${id}`);
+
+        const data = await res.json();
 
         console.log(data);
 
         if (data.success) {
-          const user = data.user;
+
+          const user: UserType = data.user;
 
           setName(user.name || "");
-          setAge(user.age || "");
+
+          setAge(user.age?.toString() || "");
+
           setEmail(user.email || "");
 
           setAddress(user.address || "");
+
           setContact(user.contact || "");
+
           setEducation(user.education || "");
+
           setHobby(user.hobby || "");
+
           setInterest(user.interest || "");
+
           setProfilePic(user.profilePic || "");
         }
+
       } catch (err) {
+
         console.log(err);
+
       } finally {
+
         setLoading(false);
       }
     };
 
     if (id) {
+
       getUser();
     }
+
   }, [id]);
 
   // 🔵 Update User
   const handleUpdate = async () => {
-  try {
-    let res = await fetch(`/api/users/${id}`, {
-      method: "PUT",
-      body: JSON.stringify({
-        name,
-        age,
-        email,
-        password,
-        address,
-        contact,
-        education,
-        hobby,
-        interest,
 
-        // 👇 SEND IMAGE
-        profilePic,
-      }),
+    try {
 
-      headers: {
-        "content-type": "application/json",
-      },
-    });
+      const res = await fetch(`/api/users/${id}`, {
 
-    let data = await res.json();
+        method: "PUT",
 
-    console.log(data);
+        body: JSON.stringify({
 
-    if (data.success) {
-      alert("Profile Updated Successfully!");
+          name,
+          age,
+          email,
+          password,
+          address,
+          contact,
+          education,
+          hobby,
+          interest,
+          profilePic,
+        }),
 
-      router.push(`/profile2?email=${email}`);
-    } else {
-      alert(data.message);
+        headers: {
+          "content-type": "application/json",
+        },
+      });
+
+      const data = await res.json();
+
+      console.log(data);
+
+      if (data.success) {
+
+        alert("Profile Updated Successfully!");
+
+        router.push(`/profile2?email=${email}`);
+
+      } else {
+
+        alert(data.message);
+      }
+
+    } catch (err) {
+
+      console.log(err);
     }
-  } catch (err) {
-    console.log(err);
-  }
-};
+  };
 
   // Loading
   if (loading) {
+
     return (
       <div className="min-h-screen bg-black flex items-center justify-center text-white text-2xl">
         Loading...
@@ -111,11 +154,12 @@ export default function UpdateUser() {
 
   return (
     <div className="min-h-screen bg-black text-white flex items-center justify-center p-6">
-      
+
       <div className="w-full max-w-5xl bg-zinc-950 border border-zinc-800 rounded-3xl p-10 shadow-2xl">
-        
+
         {/* Heading */}
         <div className="mb-10">
+
           <h1 className="text-4xl font-bold">
             Update Profile
           </h1>
@@ -123,6 +167,7 @@ export default function UpdateUser() {
           <p className="text-zinc-400 mt-2">
             Edit your personal information and account details.
           </p>
+
         </div>
 
         {/* Form */}
@@ -130,6 +175,7 @@ export default function UpdateUser() {
 
           {/* Name */}
           <div>
+
             <label className="text-sm text-zinc-400">
               Full Name
             </label>
@@ -141,10 +187,12 @@ export default function UpdateUser() {
               placeholder="Enter name"
               className="w-full mt-2 bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 outline-none focus:border-cyan-500"
             />
+
           </div>
 
           {/* Age */}
           <div>
+
             <label className="text-sm text-zinc-400">
               Age
             </label>
@@ -156,10 +204,12 @@ export default function UpdateUser() {
               placeholder="Enter age"
               className="w-full mt-2 bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 outline-none focus:border-cyan-500"
             />
+
           </div>
 
           {/* Email */}
           <div>
+
             <label className="text-sm text-zinc-400">
               Email
             </label>
@@ -171,10 +221,12 @@ export default function UpdateUser() {
               placeholder="Enter email"
               className="w-full mt-2 bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 outline-none focus:border-cyan-500"
             />
+
           </div>
 
           {/* Password */}
           <div>
+
             <label className="text-sm text-zinc-400">
               New Password
             </label>
@@ -186,10 +238,12 @@ export default function UpdateUser() {
               placeholder="Enter new password"
               className="w-full mt-2 bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 outline-none focus:border-cyan-500"
             />
+
           </div>
 
           {/* Contact */}
           <div>
+
             <label className="text-sm text-zinc-400">
               Contact Number
             </label>
@@ -201,10 +255,12 @@ export default function UpdateUser() {
               placeholder="Enter contact number"
               className="w-full mt-2 bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 outline-none focus:border-cyan-500"
             />
+
           </div>
 
           {/* Education */}
           <div>
+
             <label className="text-sm text-zinc-400">
               Education
             </label>
@@ -216,10 +272,12 @@ export default function UpdateUser() {
               placeholder="Enter education"
               className="w-full mt-2 bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 outline-none focus:border-cyan-500"
             />
+
           </div>
 
           {/* Hobby */}
           <div>
+
             <label className="text-sm text-zinc-400">
               Hobby
             </label>
@@ -231,10 +289,12 @@ export default function UpdateUser() {
               placeholder="Enter hobby"
               className="w-full mt-2 bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 outline-none focus:border-cyan-500"
             />
+
           </div>
 
           {/* Interest */}
           <div>
+
             <label className="text-sm text-zinc-400">
               Interest
             </label>
@@ -246,10 +306,12 @@ export default function UpdateUser() {
               placeholder="Enter interests"
               className="w-full mt-2 bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 outline-none focus:border-cyan-500"
             />
+
           </div>
 
           {/* Address */}
           <div className="md:col-span-2">
+
             <label className="text-sm text-zinc-400">
               Address
             </label>
@@ -261,19 +323,25 @@ export default function UpdateUser() {
               rows={4}
               className="w-full mt-2 bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 outline-none focus:border-cyan-500 resize-none"
             />
+
           </div>
+
         </div>
 
         {/* Button */}
         <div className="mt-10">
+
           <button
             onClick={handleUpdate}
             className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:scale-[1.01] transition duration-300 py-4 rounded-2xl text-lg font-semibold shadow-lg shadow-cyan-500/20"
           >
             Update Profile
           </button>
+
         </div>
+
       </div>
+
     </div>
   );
 }
