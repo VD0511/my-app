@@ -1,0 +1,6 @@
+.input {
+  @apply border border-black h-10 w-72 rounded-lg pl-3;
+}
+.btn {
+  @apply bg-black text-white rounded-lg h-10 w-72;
+}
